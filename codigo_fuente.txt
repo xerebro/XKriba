@@ -1,4 +1,6 @@
-Eres un desarrollador experto en extensiones para browser particularmente chrome, eres proactivo, inteligente, enfocado al detalle y a la calidad, te caracterizas por tomardesiciones autonomas y acertadas de cara a completar tus tareas, siempre entregas tustareas con alta calidad y alto nivel tecnico, tienes aplios conocimientos en ejecutar modelos de Gen AI en el browser usando transformers.js con baja latenciay usando el estado del arte en modelos,debes trabajar en la siguiente base de codigo:
+Eres un ingeniero de software de élite especializado en el desarrollo de extensiones para navegadores, particularmente Chrome. Tienes una vasta experiencia en la implementación de tecnologías de Inteligencia Artificial en el navegador utilizando bibliotecas como transformers.js. Tu enfoque es la excelencia, la precisión y la optimización de rendimiento con baja latencia. 
+Tu objetivo es mejorar y optimizar la base de código proporcionada, identificando y resolviendo problemas, creando nuevas funcionalidades y mejorando el rendimiento general del proyecto. 
+A continuación, se presenta la base de código del proyecto. Cada archivo de código fuente está marcado con un indicador de inicio y fin, junto con el nombre y la ruta relativa del archivo:
 
 /tsconfig.node.json:
 ------BEGIN OF FILE----
@@ -393,239 +395,6 @@ export default {
 
 ------END OF FILE----
 
-/.github/release.yml:
-------BEGIN OF FILE----
-changelog:
-  exclude:
-    labels:
-      - tagpr
-
-------END OF FILE----
-
-/.github/workflows/release.yml:
-------BEGIN OF FILE----
-name: tagpr
-on:
-  push:
-    branches: ["main"]
-jobs:
-  tagpr:
-    runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.tagpr.outputs.tag }}
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-      - uses: actions/create-github-app-token@v2
-        id: app-token
-        with:
-          app-id: 1053852
-          private-key: ${{ secrets.AINOYA_BOT_PRIVATE_KEY }}
-      - name: Get GitHub App User ID
-        id: get-user-id
-        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-      - run: |
-          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
-          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>'
-      - name: increment chrome extnsion manifest.json version
-        run: |
-          CURRENT_VERSION=$(jq -r '.version' public/manifest.json)
-          NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{if (NF==1) {$1+=1} else {$NF+=1}; OFS="."; print $0}' | sed 's/ /./g')
-          jq --arg new_version $NEW_VERSION '.version = $new_version' public/manifest.json > public/manifest.json.tmp
-          mv public/manifest.json.tmp public/manifest.json
-      - name: npm install
-        run: npm install
-      - name: biome check fix
-        run: npm run check -- --fix
-      - uses: Songmu/tagpr@v1
-        id: tagpr
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-  # run job to upload artifact if git tagged
-  upload:
-    runs-on: ubuntu-latest
-    needs: tagpr
-    if: needs.tagpr.outputs.tag != ''
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm install
-      - name: Build
-        run: |
-          npm run build
-          zip -r dist.zip dist
-      - name: Upload artifact
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.tagpr.outputs.tag }}
-          files: |
-            dist.zip
-
-------END OF FILE----
-
-/.github/workflows/test.yml:
-------BEGIN OF FILE----
-# Test Build
-
-name: Test
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install
-      
-      - name: biome check
-        run: npm run check
-
-      - name: Test Build
-        run: npm run build
-
-------END OF FILE----
-
-/.github/workflows/release.yml:
-------BEGIN OF FILE----
-name: tagpr
-on:
-  push:
-    branches: ["main"]
-jobs:
-  tagpr:
-    runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.tagpr.outputs.tag }}
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-      - uses: actions/create-github-app-token@v2
-        id: app-token
-        with:
-          app-id: 1053852
-          private-key: ${{ secrets.AINOYA_BOT_PRIVATE_KEY }}
-      - name: Get GitHub App User ID
-        id: get-user-id
-        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-      - run: |
-          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
-          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>'
-      - name: increment chrome extnsion manifest.json version
-        run: |
-          CURRENT_VERSION=$(jq -r '.version' public/manifest.json)
-          NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{if (NF==1) {$1+=1} else {$NF+=1}; OFS="."; print $0}' | sed 's/ /./g')
-          jq --arg new_version $NEW_VERSION '.version = $new_version' public/manifest.json > public/manifest.json.tmp
-          mv public/manifest.json.tmp public/manifest.json
-      - name: npm install
-        run: npm install
-      - name: biome check fix
-        run: npm run check -- --fix
-      - uses: Songmu/tagpr@v1
-        id: tagpr
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-  # run job to upload artifact if git tagged
-  upload:
-    runs-on: ubuntu-latest
-    needs: tagpr
-    if: needs.tagpr.outputs.tag != ''
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm install
-      - name: Build
-        run: |
-          npm run build
-          zip -r dist.zip dist
-      - name: Upload artifact
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.tagpr.outputs.tag }}
-          files: |
-            dist.zip
-
-------END OF FILE----
-
-/.github/workflows/test.yml:
-------BEGIN OF FILE----
-# Test Build
-
-name: Test
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install
-      
-      - name: biome check
-        run: npm run check
-
-      - name: Test Build
-        run: npm run build
-
-------END OF FILE----
-
 /src/whisper-worker.d.ts:
 ------BEGIN OF FILE----
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -788,193 +557,157 @@ export async function summarizeWebPage(language: string): Promise<string> {
 
 /src/side-panel-app.tsx:
 ------BEGIN OF FILE----
-import type React from "react";
+// src/side-panel-app.tsx
 import { useEffect, useState } from "react";
 import { AiSummarizer } from "./components/ai-summarizer";
 import { Button } from "./components/ui/button";
 import { Textarea } from "./components/ui/textarea";
+import { PromptArea } from "./components/PromptArea";
 import { useToast } from "./components/ui/use-toast";
 import { summarizeWebPage } from "./summarizer";
 import { LanguageSelector } from "./components/LanguageSelector";
-import {
-	type TranscriptionLanguage,
-	transcriptionSettingsAtom,
-} from "./jotai/settingAtom";
+import { transcriptionSettingsAtom } from "./jotai/settingAtom";
 import { useAtom } from "jotai";
-import {
-	modelLoadingProgressAtom,
-	modelStatusAtom,
-} from "./jotai/modelStatusAtom";
-
-const fetchAiCapabilities = async () => {
-	if (!window.ai) {
-		return {
-			available: "no",
-		};
-	}
-
-	const { available } = await window.ai.languageModel.capabilities();
-
-	return {
-		available,
-	};
-};
+import { modelLoadingProgressAtom, modelStatusAtom } from "./jotai/modelStatusAtom";
+import { generateResponse } from "../utils/generateResponse";
 
 const SidePanelApp: React.FC = () => {
-	const [summary, setSummary] = useState("");
-	const [transcriptionSettings, setTranscriptionSettings] = useAtom(
-		transcriptionSettingsAtom,
-	);
-	const [isSummaryLoading, setIsSummaryLoading] = useState(false);
-	const [aiCapabilities, setAiCapabilities] = useState<{ available: string }>({
-		available: "no",
-	});
-	const [transcription, setTranscription] = useState("");
-	const [modelStatus, setModelStatus] = useAtom(modelStatusAtom);
-	const [loadingProgress, setLoadingProgress] = useAtom(
-		modelLoadingProgressAtom,
-	);
+  const [summary, setSummary] = useState("");
+  const [transcriptionSettings, setTranscriptionSettings] = useAtom(transcriptionSettingsAtom);
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+  const [aiCapabilities, setAiCapabilities] = useState<{ available: string }>({ available: "no" });
+  const [transcription, setTranscription] = useState("");
+  const [modelStatus, setModelStatus] = useAtom(modelStatusAtom);
+  const [loadingProgress, setLoadingProgress] = useAtom(modelLoadingProgressAtom);
 
-	useEffect(() => {
-		fetchAiCapabilities().then((capabilities) => {
-			setAiCapabilities(capabilities);
-		});
+  const { toast } = useToast();
 
-		chrome.runtime.onMessage.addListener((message) => {
-			if (message.type === "transcript") {
-				console.debug("Received transcript message", message.data.transcripted);
-				setTranscription((prev) => `${prev}\n${message.data.transcripted}`);
-			} else if (message.type === "model-status") {
-				console.debug("Received model status", message.data.status);
-				setModelStatus(message.data.status);
-				if (message.data.status === "loading") {
-					setLoadingProgress(message.data.progress);
-				}
-			}
-		});
-	}, [setModelStatus, setLoadingProgress]);
+  useEffect(() => {
+    fetchAiCapabilities().then((capabilities) => {
+      setAiCapabilities(capabilities);
+    });
 
-	const { toast } = useToast();
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message.type === "transcript") {
+        setTranscription((prev) => `${prev}\n${message.data}`);
+      } else if (message.type === "model-status") {
+        setModelStatus(message.data.status);
+        if (message.data.status === "loading") {
+          setLoadingProgress(message.data.progress);
+        }
+      }
+    });
+  }, [setModelStatus, setLoadingProgress]);
 
-	const handleSummarize = async () => {
-		setIsSummaryLoading(true);
-		try {
-			const result = await summarizeWebPage(transcriptionSettings.language);
-			setSummary(result);
-			toast({
-				description: "Summarized",
-				color: "success",
-			});
-		} catch (error) {
-			console.error(error);
-			setSummary(`Failed to summarize: ${error}`);
-			toast({
-				description: "Failed to summarize",
-				color: "error",
-			});
-		} finally {
-			setIsSummaryLoading(false);
-		}
-	};
+  const handleSummarize = async () => {
+    setIsSummaryLoading(true);
+    try {
+      const result = await summarizeWebPage(transcriptionSettings.language);
+      setSummary(result);
+      toast({
+        description: "Summarized",
+        color: "success",
+      });
+    } catch (error) {
+      console.error(error);
+      setSummary(`Failed to summarize: ${error}`);
+      toast({
+        description: "Failed to summarize",
+        color: "error",
+      });
+    } finally {
+      setIsSummaryLoading(false);
+    }
+  };
 
-	const language: TranscriptionLanguage =
-		transcriptionSettings.language as TranscriptionLanguage;
+  const handleSendPrompt = async (prompt: string) => {
+    try {
+      const response = await generateResponse(prompt, transcription);
+      toast({
+        description: response,
+        color: "success",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        description: "Failed to generate response",
+        color: "error",
+      });
+    }
+  };
 
-	return (
-		<div className="container">
-			<div className="box-border">
-				{/* Transcription from web speech api */}
-				<div className="flex flex-col m-1 p-1">
-					<h1>Transcription</h1>
-					<div className="text-center mt-1">
-						<Textarea value={transcription} rows={20} readOnly />
-					</div>
-					{/* model status */}
-					<div className="text-center">
-						<h1>Model Status: {modelStatus}</h1>
-						{modelStatus === "loading" && <p>{loadingProgress}% loaded</p>}
-					</div>
-				</div>
-				<div className="flex flex-col m-1 p-1">
-					<LanguageSelector
-						language={language}
-						setLanguage={(language: TranscriptionLanguage) =>
-							setTranscriptionSettings((prev) => {
-								return { ...prev, language };
-							})
-						}
-					/>
-				</div>
-				{/* record button */}
-				{/* <div className="flex flex-col m-1 p-1">
-          <Button
-            onClick={() => chrome.runtime.sendMessage({ type: "startCapture" })}
-          >
-            Stop Recording
-          </Button>
-        </div> */}
-				{/* if status is unknown or error, show loading model button */}
-				{/* {(modelStatus === "unknown" || modelStatus === "error") && (
-          <div className="flex flex-col m-1 p-1">
-            <Button
-              onClick={() =>
-                chrome.runtime.sendMessage({
-                  type: "initialize-transcription-model",
-                })
-              }
-            >
-              Load Model
-            </Button>
+  return (
+    <div className="container">
+      <div className="box-border">
+        <div className="flex flex-col m-1 p-1">
+          <h1>Transcription</h1>
+          <div className="text-center mt-1">
+            <Textarea value={transcription} rows={20} readOnly />
           </div>
-        )} */}
-
-				{/* copy to clipboard button */}
-				<div className="flex flex-col m-1 p-1">
-					<Button
-						onClick={() => {
-							navigator.clipboard.writeText(transcription);
-							toast({
-								description: "Copied to clipboard",
-								color: "success",
-								duration: 1000,
-							});
-						}}
-					>
-						Copy to Clipboard
-					</Button>
-				</div>
-
-				{aiCapabilities.available === "no" && (
-					<div className="flex flex-col m-1 p-1">
-						<div className="text-center">
-							<h1>AI Summarization is not available</h1>
-							<p>
-								AI Summarization is not available. Please make sure your chrome
-								supports Prompt API.
-							</p>
-						</div>
-					</div>
-				)}
-				{aiCapabilities.available !== "no" && (
-					<AiSummarizer
-						setLanguage={(language: TranscriptionLanguage) =>
-							setTranscriptionSettings((prev) => {
-								return { ...prev, language: language };
-							})
-						}
-						language={transcriptionSettings.language}
-						isSummaryLoading={isSummaryLoading}
-						handleSummarize={handleSummarize}
-						summary={summary}
-					/>
-				)}
-			</div>
-		</div>
-	);
+          <div className="text-center">
+            <h1>Model Status: {modelStatus}</h1>
+            {modelStatus === "loading" && <p>{loadingProgress}% loaded</p>}
+          </div>
+        </div>
+        <div className="flex flex-col m-1 p-1">
+          <LanguageSelector
+            language={transcriptionSettings.language}
+            setLanguage={(language) =>
+              setTranscriptionSettings((prev) => ({
+                ...prev,
+                language,
+              }))
+            }
+          />
+        </div>
+        <div className="flex flex-col m-1 p-1">
+          <PromptArea onSendPrompt={handleSendPrompt} />
+        </div>
+        <div className="flex flex-col m-1 p-1">
+          <Button
+            onClick={() => {
+              navigator.clipboard.writeText(transcription);
+              toast({
+                description: "Copied to clipboard",
+                color: "success",
+                duration: 1000,
+              });
+            }}
+          >
+            Copy to Clipboard
+          </Button>
+        </div>
+        {aiCapabilities.available === "no" && (
+          <div className="flex flex-col m-1 p-1">
+            <div className="text-center">
+              <h1>AI Summarization is not available</h1>
+              <p>
+                AI Summarization is not available. Please make sure your chrome
+                supports Prompt API.
+              </p>
+            </div>
+          </div>
+        )}
+        {aiCapabilities.available !== "no" && (
+          <AiSummarizer
+            setLanguage={(language) =>
+              setTranscriptionSettings((prev) => ({
+                ...prev,
+                language,
+              }))
+            }
+            language={transcriptionSettings.language}
+            isSummaryLoading={isSummaryLoading}
+            handleSummarize={handleSummarize}
+            summary={summary}
+          />
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default SidePanelApp;
-
 ------END OF FILE----
 
 /src/index.css:
@@ -1658,6 +1391,25 @@ export default Popup;
 
 ------END OF FILE----
 
+/src/utils/generateResponse.ts:
+------BEGIN OF FILE----
+// src/utils/generateResponse.ts
+import { AutoTokenizer, AutoModelForCausalLM } from "@huggingface/transformers";
+
+export async function generateResponse(prompt: string, transcript: string): Promise<string> {
+  const tokenizer = await AutoTokenizer.from_pretrained("Xenova/Qwen1.5-0.5B-Chat");
+  const model = await AutoModelForCausalLM.from_pretrained("Xenova/Qwen1.5-0.5B-Chat");
+
+  const inputText = `${prompt}\n${transcript}`;
+  const inputs = tokenizer.encode(inputText, { return_tensors: "pt" });
+
+  const output = await model.generate(inputs, { max_length: 500 });
+  const response = tokenizer.decode(output[0], { skip_special_tokens: true });
+
+  return response;
+}
+------END OF FILE----
+
 /src/components/theme-provider.tsx:
 ------BEGIN OF FILE----
 import { createContext, useContext, useEffect, useState } from "react";
@@ -1806,6 +1558,43 @@ const SelectItem: React.FC<SelectItemProps> = ({ children, ...props }) => {
 	);
 };
 
+------END OF FILE----
+
+/src/components/PromptArea.tsx:
+------BEGIN OF FILE----
+// src/components/PromptArea.tsx
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import { SendIcon } from "lucide-react";
+
+interface PromptAreaProps {
+  onSendPrompt: (prompt: string) => void;
+}
+
+export const PromptArea: React.FC<PromptAreaProps> = ({ onSendPrompt }) => {
+  const [prompt, setPrompt] = useState("");
+
+  const handleSendPrompt = () => {
+    if (prompt.trim() !== "") {
+      onSendPrompt(prompt);
+      setPrompt("");
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Textarea
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        rows={4}
+        placeholder="Enter your prompt here..."
+      />
+      <Button onClick={handleSendPrompt}>
+        <SendIcon className="mr-2 h-4 w-4" /> Send
+      </Button>
+    </div>
+  );
+};
 ------END OF FILE----
 
 /src/components/ai-summarizer.tsx:
@@ -3506,6 +3295,25 @@ export const transcriptionSettingsAtom = atomWithStorage<TranscriptionSettings>(
 
 ------END OF FILE----
 
+/src/utils/generateResponse.ts:
+------BEGIN OF FILE----
+// src/utils/generateResponse.ts
+import { AutoTokenizer, AutoModelForCausalLM } from "@huggingface/transformers";
+
+export async function generateResponse(prompt: string, transcript: string): Promise<string> {
+  const tokenizer = await AutoTokenizer.from_pretrained("Xenova/Qwen1.5-0.5B-Chat");
+  const model = await AutoModelForCausalLM.from_pretrained("Xenova/Qwen1.5-0.5B-Chat");
+
+  const inputText = `${prompt}\n${transcript}`;
+  const inputs = tokenizer.encode(inputText, { return_tensors: "pt" });
+
+  const output = await model.generate(inputs, { max_length: 500 });
+  const response = tokenizer.decode(output[0], { skip_special_tokens: true });
+
+  return response;
+}
+------END OF FILE----
+
 /src/components/theme-provider.tsx:
 ------BEGIN OF FILE----
 import { createContext, useContext, useEffect, useState } from "react";
@@ -3654,6 +3462,43 @@ const SelectItem: React.FC<SelectItemProps> = ({ children, ...props }) => {
 	);
 };
 
+------END OF FILE----
+
+/src/components/PromptArea.tsx:
+------BEGIN OF FILE----
+// src/components/PromptArea.tsx
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import { SendIcon } from "lucide-react";
+
+interface PromptAreaProps {
+  onSendPrompt: (prompt: string) => void;
+}
+
+export const PromptArea: React.FC<PromptAreaProps> = ({ onSendPrompt }) => {
+  const [prompt, setPrompt] = useState("");
+
+  const handleSendPrompt = () => {
+    if (prompt.trim() !== "") {
+      onSendPrompt(prompt);
+      setPrompt("");
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Textarea
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        rows={4}
+        placeholder="Enter your prompt here..."
+      />
+      <Button onClick={handleSendPrompt}>
+        <SendIcon className="mr-2 h-4 w-4" /> Send
+      </Button>
+    </div>
+  );
+};
 ------END OF FILE----
 
 /src/components/ai-summarizer.tsx:
@@ -5351,239 +5196,6 @@ export const transcriptionSettingsAtom = atomWithStorage<TranscriptionSettings>(
 		language: "english" as TranscriptionLanguage,
 	},
 );
-
-------END OF FILE----
-
-/.github/release.yml:
-------BEGIN OF FILE----
-changelog:
-  exclude:
-    labels:
-      - tagpr
-
-------END OF FILE----
-
-/.github/workflows/release.yml:
-------BEGIN OF FILE----
-name: tagpr
-on:
-  push:
-    branches: ["main"]
-jobs:
-  tagpr:
-    runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.tagpr.outputs.tag }}
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-      - uses: actions/create-github-app-token@v2
-        id: app-token
-        with:
-          app-id: 1053852
-          private-key: ${{ secrets.AINOYA_BOT_PRIVATE_KEY }}
-      - name: Get GitHub App User ID
-        id: get-user-id
-        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-      - run: |
-          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
-          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>'
-      - name: increment chrome extnsion manifest.json version
-        run: |
-          CURRENT_VERSION=$(jq -r '.version' public/manifest.json)
-          NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{if (NF==1) {$1+=1} else {$NF+=1}; OFS="."; print $0}' | sed 's/ /./g')
-          jq --arg new_version $NEW_VERSION '.version = $new_version' public/manifest.json > public/manifest.json.tmp
-          mv public/manifest.json.tmp public/manifest.json
-      - name: npm install
-        run: npm install
-      - name: biome check fix
-        run: npm run check -- --fix
-      - uses: Songmu/tagpr@v1
-        id: tagpr
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-  # run job to upload artifact if git tagged
-  upload:
-    runs-on: ubuntu-latest
-    needs: tagpr
-    if: needs.tagpr.outputs.tag != ''
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm install
-      - name: Build
-        run: |
-          npm run build
-          zip -r dist.zip dist
-      - name: Upload artifact
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.tagpr.outputs.tag }}
-          files: |
-            dist.zip
-
-------END OF FILE----
-
-/.github/workflows/test.yml:
-------BEGIN OF FILE----
-# Test Build
-
-name: Test
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install
-      
-      - name: biome check
-        run: npm run check
-
-      - name: Test Build
-        run: npm run build
-
-------END OF FILE----
-
-/.github/workflows/release.yml:
-------BEGIN OF FILE----
-name: tagpr
-on:
-  push:
-    branches: ["main"]
-jobs:
-  tagpr:
-    runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.tagpr.outputs.tag }}
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-      - uses: actions/create-github-app-token@v2
-        id: app-token
-        with:
-          app-id: 1053852
-          private-key: ${{ secrets.AINOYA_BOT_PRIVATE_KEY }}
-      - name: Get GitHub App User ID
-        id: get-user-id
-        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-      - run: |
-          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
-          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>'
-      - name: increment chrome extnsion manifest.json version
-        run: |
-          CURRENT_VERSION=$(jq -r '.version' public/manifest.json)
-          NEW_VERSION=$(echo $CURRENT_VERSION | awk -F. '{if (NF==1) {$1+=1} else {$NF+=1}; OFS="."; print $0}' | sed 's/ /./g')
-          jq --arg new_version $NEW_VERSION '.version = $new_version' public/manifest.json > public/manifest.json.tmp
-          mv public/manifest.json.tmp public/manifest.json
-      - name: npm install
-        run: npm install
-      - name: biome check fix
-        run: npm run check -- --fix
-      - uses: Songmu/tagpr@v1
-        id: tagpr
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-  # run job to upload artifact if git tagged
-  upload:
-    runs-on: ubuntu-latest
-    needs: tagpr
-    if: needs.tagpr.outputs.tag != ''
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm install
-      - name: Build
-        run: |
-          npm run build
-          zip -r dist.zip dist
-      - name: Upload artifact
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ needs.tagpr.outputs.tag }}
-          files: |
-            dist.zip
-
-------END OF FILE----
-
-/.github/workflows/test.yml:
-------BEGIN OF FILE----
-# Test Build
-
-name: Test
-
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install
-      
-      - name: biome check
-        run: npm run check
-
-      - name: Test Build
-        run: npm run build
 
 ------END OF FILE----
 
@@ -5749,193 +5361,157 @@ export async function summarizeWebPage(language: string): Promise<string> {
 
 /src/side-panel-app.tsx:
 ------BEGIN OF FILE----
-import type React from "react";
+// src/side-panel-app.tsx
 import { useEffect, useState } from "react";
 import { AiSummarizer } from "./components/ai-summarizer";
 import { Button } from "./components/ui/button";
 import { Textarea } from "./components/ui/textarea";
+import { PromptArea } from "./components/PromptArea";
 import { useToast } from "./components/ui/use-toast";
 import { summarizeWebPage } from "./summarizer";
 import { LanguageSelector } from "./components/LanguageSelector";
-import {
-	type TranscriptionLanguage,
-	transcriptionSettingsAtom,
-} from "./jotai/settingAtom";
+import { transcriptionSettingsAtom } from "./jotai/settingAtom";
 import { useAtom } from "jotai";
-import {
-	modelLoadingProgressAtom,
-	modelStatusAtom,
-} from "./jotai/modelStatusAtom";
-
-const fetchAiCapabilities = async () => {
-	if (!window.ai) {
-		return {
-			available: "no",
-		};
-	}
-
-	const { available } = await window.ai.languageModel.capabilities();
-
-	return {
-		available,
-	};
-};
+import { modelLoadingProgressAtom, modelStatusAtom } from "./jotai/modelStatusAtom";
+import { generateResponse } from "../utils/generateResponse";
 
 const SidePanelApp: React.FC = () => {
-	const [summary, setSummary] = useState("");
-	const [transcriptionSettings, setTranscriptionSettings] = useAtom(
-		transcriptionSettingsAtom,
-	);
-	const [isSummaryLoading, setIsSummaryLoading] = useState(false);
-	const [aiCapabilities, setAiCapabilities] = useState<{ available: string }>({
-		available: "no",
-	});
-	const [transcription, setTranscription] = useState("");
-	const [modelStatus, setModelStatus] = useAtom(modelStatusAtom);
-	const [loadingProgress, setLoadingProgress] = useAtom(
-		modelLoadingProgressAtom,
-	);
+  const [summary, setSummary] = useState("");
+  const [transcriptionSettings, setTranscriptionSettings] = useAtom(transcriptionSettingsAtom);
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+  const [aiCapabilities, setAiCapabilities] = useState<{ available: string }>({ available: "no" });
+  const [transcription, setTranscription] = useState("");
+  const [modelStatus, setModelStatus] = useAtom(modelStatusAtom);
+  const [loadingProgress, setLoadingProgress] = useAtom(modelLoadingProgressAtom);
 
-	useEffect(() => {
-		fetchAiCapabilities().then((capabilities) => {
-			setAiCapabilities(capabilities);
-		});
+  const { toast } = useToast();
 
-		chrome.runtime.onMessage.addListener((message) => {
-			if (message.type === "transcript") {
-				console.debug("Received transcript message", message.data.transcripted);
-				setTranscription((prev) => `${prev}\n${message.data.transcripted}`);
-			} else if (message.type === "model-status") {
-				console.debug("Received model status", message.data.status);
-				setModelStatus(message.data.status);
-				if (message.data.status === "loading") {
-					setLoadingProgress(message.data.progress);
-				}
-			}
-		});
-	}, [setModelStatus, setLoadingProgress]);
+  useEffect(() => {
+    fetchAiCapabilities().then((capabilities) => {
+      setAiCapabilities(capabilities);
+    });
 
-	const { toast } = useToast();
+    chrome.runtime.onMessage.addListener((message) => {
+      if (message.type === "transcript") {
+        setTranscription((prev) => `${prev}\n${message.data}`);
+      } else if (message.type === "model-status") {
+        setModelStatus(message.data.status);
+        if (message.data.status === "loading") {
+          setLoadingProgress(message.data.progress);
+        }
+      }
+    });
+  }, [setModelStatus, setLoadingProgress]);
 
-	const handleSummarize = async () => {
-		setIsSummaryLoading(true);
-		try {
-			const result = await summarizeWebPage(transcriptionSettings.language);
-			setSummary(result);
-			toast({
-				description: "Summarized",
-				color: "success",
-			});
-		} catch (error) {
-			console.error(error);
-			setSummary(`Failed to summarize: ${error}`);
-			toast({
-				description: "Failed to summarize",
-				color: "error",
-			});
-		} finally {
-			setIsSummaryLoading(false);
-		}
-	};
+  const handleSummarize = async () => {
+    setIsSummaryLoading(true);
+    try {
+      const result = await summarizeWebPage(transcriptionSettings.language);
+      setSummary(result);
+      toast({
+        description: "Summarized",
+        color: "success",
+      });
+    } catch (error) {
+      console.error(error);
+      setSummary(`Failed to summarize: ${error}`);
+      toast({
+        description: "Failed to summarize",
+        color: "error",
+      });
+    } finally {
+      setIsSummaryLoading(false);
+    }
+  };
 
-	const language: TranscriptionLanguage =
-		transcriptionSettings.language as TranscriptionLanguage;
+  const handleSendPrompt = async (prompt: string) => {
+    try {
+      const response = await generateResponse(prompt, transcription);
+      toast({
+        description: response,
+        color: "success",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        description: "Failed to generate response",
+        color: "error",
+      });
+    }
+  };
 
-	return (
-		<div className="container">
-			<div className="box-border">
-				{/* Transcription from web speech api */}
-				<div className="flex flex-col m-1 p-1">
-					<h1>Transcription</h1>
-					<div className="text-center mt-1">
-						<Textarea value={transcription} rows={20} readOnly />
-					</div>
-					{/* model status */}
-					<div className="text-center">
-						<h1>Model Status: {modelStatus}</h1>
-						{modelStatus === "loading" && <p>{loadingProgress}% loaded</p>}
-					</div>
-				</div>
-				<div className="flex flex-col m-1 p-1">
-					<LanguageSelector
-						language={language}
-						setLanguage={(language: TranscriptionLanguage) =>
-							setTranscriptionSettings((prev) => {
-								return { ...prev, language };
-							})
-						}
-					/>
-				</div>
-				{/* record button */}
-				{/* <div className="flex flex-col m-1 p-1">
-          <Button
-            onClick={() => chrome.runtime.sendMessage({ type: "startCapture" })}
-          >
-            Stop Recording
-          </Button>
-        </div> */}
-				{/* if status is unknown or error, show loading model button */}
-				{/* {(modelStatus === "unknown" || modelStatus === "error") && (
-          <div className="flex flex-col m-1 p-1">
-            <Button
-              onClick={() =>
-                chrome.runtime.sendMessage({
-                  type: "initialize-transcription-model",
-                })
-              }
-            >
-              Load Model
-            </Button>
+  return (
+    <div className="container">
+      <div className="box-border">
+        <div className="flex flex-col m-1 p-1">
+          <h1>Transcription</h1>
+          <div className="text-center mt-1">
+            <Textarea value={transcription} rows={20} readOnly />
           </div>
-        )} */}
-
-				{/* copy to clipboard button */}
-				<div className="flex flex-col m-1 p-1">
-					<Button
-						onClick={() => {
-							navigator.clipboard.writeText(transcription);
-							toast({
-								description: "Copied to clipboard",
-								color: "success",
-								duration: 1000,
-							});
-						}}
-					>
-						Copy to Clipboard
-					</Button>
-				</div>
-
-				{aiCapabilities.available === "no" && (
-					<div className="flex flex-col m-1 p-1">
-						<div className="text-center">
-							<h1>AI Summarization is not available</h1>
-							<p>
-								AI Summarization is not available. Please make sure your chrome
-								supports Prompt API.
-							</p>
-						</div>
-					</div>
-				)}
-				{aiCapabilities.available !== "no" && (
-					<AiSummarizer
-						setLanguage={(language: TranscriptionLanguage) =>
-							setTranscriptionSettings((prev) => {
-								return { ...prev, language: language };
-							})
-						}
-						language={transcriptionSettings.language}
-						isSummaryLoading={isSummaryLoading}
-						handleSummarize={handleSummarize}
-						summary={summary}
-					/>
-				)}
-			</div>
-		</div>
-	);
+          <div className="text-center">
+            <h1>Model Status: {modelStatus}</h1>
+            {modelStatus === "loading" && <p>{loadingProgress}% loaded</p>}
+          </div>
+        </div>
+        <div className="flex flex-col m-1 p-1">
+          <LanguageSelector
+            language={transcriptionSettings.language}
+            setLanguage={(language) =>
+              setTranscriptionSettings((prev) => ({
+                ...prev,
+                language,
+              }))
+            }
+          />
+        </div>
+        <div className="flex flex-col m-1 p-1">
+          <PromptArea onSendPrompt={handleSendPrompt} />
+        </div>
+        <div className="flex flex-col m-1 p-1">
+          <Button
+            onClick={() => {
+              navigator.clipboard.writeText(transcription);
+              toast({
+                description: "Copied to clipboard",
+                color: "success",
+                duration: 1000,
+              });
+            }}
+          >
+            Copy to Clipboard
+          </Button>
+        </div>
+        {aiCapabilities.available === "no" && (
+          <div className="flex flex-col m-1 p-1">
+            <div className="text-center">
+              <h1>AI Summarization is not available</h1>
+              <p>
+                AI Summarization is not available. Please make sure your chrome
+                supports Prompt API.
+              </p>
+            </div>
+          </div>
+        )}
+        {aiCapabilities.available !== "no" && (
+          <AiSummarizer
+            setLanguage={(language) =>
+              setTranscriptionSettings((prev) => ({
+                ...prev,
+                language,
+              }))
+            }
+            language={transcriptionSettings.language}
+            isSummaryLoading={isSummaryLoading}
+            handleSummarize={handleSummarize}
+            summary={summary}
+          />
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default SidePanelApp;
-
 ------END OF FILE----
 
 /src/index.css:
@@ -6619,6 +6195,25 @@ export default Popup;
 
 ------END OF FILE----
 
+/src/utils/generateResponse.ts:
+------BEGIN OF FILE----
+// src/utils/generateResponse.ts
+import { AutoTokenizer, AutoModelForCausalLM } from "@huggingface/transformers";
+
+export async function generateResponse(prompt: string, transcript: string): Promise<string> {
+  const tokenizer = await AutoTokenizer.from_pretrained("Xenova/Qwen1.5-0.5B-Chat");
+  const model = await AutoModelForCausalLM.from_pretrained("Xenova/Qwen1.5-0.5B-Chat");
+
+  const inputText = `${prompt}\n${transcript}`;
+  const inputs = tokenizer.encode(inputText, { return_tensors: "pt" });
+
+  const output = await model.generate(inputs, { max_length: 500 });
+  const response = tokenizer.decode(output[0], { skip_special_tokens: true });
+
+  return response;
+}
+------END OF FILE----
+
 /src/components/theme-provider.tsx:
 ------BEGIN OF FILE----
 import { createContext, useContext, useEffect, useState } from "react";
@@ -6767,6 +6362,43 @@ const SelectItem: React.FC<SelectItemProps> = ({ children, ...props }) => {
 	);
 };
 
+------END OF FILE----
+
+/src/components/PromptArea.tsx:
+------BEGIN OF FILE----
+// src/components/PromptArea.tsx
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import { SendIcon } from "lucide-react";
+
+interface PromptAreaProps {
+  onSendPrompt: (prompt: string) => void;
+}
+
+export const PromptArea: React.FC<PromptAreaProps> = ({ onSendPrompt }) => {
+  const [prompt, setPrompt] = useState("");
+
+  const handleSendPrompt = () => {
+    if (prompt.trim() !== "") {
+      onSendPrompt(prompt);
+      setPrompt("");
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Textarea
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        rows={4}
+        placeholder="Enter your prompt here..."
+      />
+      <Button onClick={handleSendPrompt}>
+        <SendIcon className="mr-2 h-4 w-4" /> Send
+      </Button>
+    </div>
+  );
+};
 ------END OF FILE----
 
 /src/components/ai-summarizer.tsx:
@@ -8467,6 +8099,25 @@ export const transcriptionSettingsAtom = atomWithStorage<TranscriptionSettings>(
 
 ------END OF FILE----
 
+/src/utils/generateResponse.ts:
+------BEGIN OF FILE----
+// src/utils/generateResponse.ts
+import { AutoTokenizer, AutoModelForCausalLM } from "@huggingface/transformers";
+
+export async function generateResponse(prompt: string, transcript: string): Promise<string> {
+  const tokenizer = await AutoTokenizer.from_pretrained("Xenova/Qwen1.5-0.5B-Chat");
+  const model = await AutoModelForCausalLM.from_pretrained("Xenova/Qwen1.5-0.5B-Chat");
+
+  const inputText = `${prompt}\n${transcript}`;
+  const inputs = tokenizer.encode(inputText, { return_tensors: "pt" });
+
+  const output = await model.generate(inputs, { max_length: 500 });
+  const response = tokenizer.decode(output[0], { skip_special_tokens: true });
+
+  return response;
+}
+------END OF FILE----
+
 /src/components/theme-provider.tsx:
 ------BEGIN OF FILE----
 import { createContext, useContext, useEffect, useState } from "react";
@@ -8615,6 +8266,43 @@ const SelectItem: React.FC<SelectItemProps> = ({ children, ...props }) => {
 	);
 };
 
+------END OF FILE----
+
+/src/components/PromptArea.tsx:
+------BEGIN OF FILE----
+// src/components/PromptArea.tsx
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import { SendIcon } from "lucide-react";
+
+interface PromptAreaProps {
+  onSendPrompt: (prompt: string) => void;
+}
+
+export const PromptArea: React.FC<PromptAreaProps> = ({ onSendPrompt }) => {
+  const [prompt, setPrompt] = useState("");
+
+  const handleSendPrompt = () => {
+    if (prompt.trim() !== "") {
+      onSendPrompt(prompt);
+      setPrompt("");
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Textarea
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        rows={4}
+        placeholder="Enter your prompt here..."
+      />
+      <Button onClick={handleSendPrompt}>
+        <SendIcon className="mr-2 h-4 w-4" /> Send
+      </Button>
+    </div>
+  );
+};
 ------END OF FILE----
 
 /src/components/ai-summarizer.tsx:
@@ -10317,11 +10005,13 @@ export const transcriptionSettingsAtom = atomWithStorage<TranscriptionSettings>(
 
 
 
-IMPORTATE:
 
-* Siempre reponde con los archivos editados completos.
 
-A continuacion la tareas a completar: 
-1. Explicame como el archivo manifest.json es generado
-2. Explicame como funciona whisper en esta aplicacion
+IMPORTANTE:
+
+* Siempre proporciona respuestas completas y detalladas.
+* Planifica tus pasos de manera estructurada antes de comenzar cualquier tarea.
+* Asegúrate de que tus respuestas sean técnicamente precisas y de alta calidad.
+
+A continuación, las tareas a completar:: 
 

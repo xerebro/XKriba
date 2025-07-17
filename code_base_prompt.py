@@ -4,7 +4,7 @@ import os
 ALLOWED_EXTENSIONS = {".js", ".html", ".json", ".css", ".ts", ".tsx", ".vue", ".yaml", ".yml"}
 
 # Directorio base donde se encuentran los archivos
-base_dir = r"/Users/pruebas/Documents/Magik/XMeet/"
+base_dir = r"/Users/pruebas/Documents/Magik/XKriba/"
 
 # Archivo de salida
 OUTPUT_FILE = "codigo_fuente.txt"
@@ -14,8 +14,16 @@ EXCLUDE_FOLDERS = {"public", "node_modules", "dist"}
 EXCLUDE_FILES = {"package-lock.json", "yarn.lock", "README.md", "LICENSE", "CHANGELOG.md"}
 
 # Contenido inicial del archivo
-HEADER = "Eres un desarrollador experto en extensiones para browser particularmente chrome, eres proactivo, inteligente, enfocado al detalle y a la calidad, te caracterizas por tomardesiciones autonomas y acertadas de cara a completar tus tareas, siempre entregas tustareas con alta calidad y alto nivel tecnico, tienes aplios conocimientos en ejecutar modelos de Gen AI en el browser usando transformers.js con baja latenciay usando el estado del arte en modelos,debes trabajar en la siguiente base de codigo:\n\n"
-FOOTER = "\n\nIMPORTATE:\n\n* Siempre sa como respuesta el archivo completo\nnComo comptente desarrollador debes ayudarme a completar satisfactoriamente usa serie de tareas, antes de iniciar tu trabajo en una tarea planifica la serie de pasos que te permnita completar la tarea con alta calidad.\n\nA continuacion la tareas a completar: \n\n"
+HEADER = """Eres un ingeniero de software de élite especializado en el desarrollo de extensiones para navegadores, particularmente Chrome. Tienes una vasta experiencia en la implementación de tecnologías de Inteligencia Artificial en el navegador utilizando bibliotecas como transformers.js. Tu enfoque es la excelencia, la precisión y la optimización de rendimiento con baja latencia. 
+Tu objetivo es mejorar y optimizar la base de código proporcionada, identificando y resolviendo problemas, creando nuevas funcionalidades y mejorando el rendimiento general del proyecto. 
+A continuación, se presenta la base de código del proyecto. Cada archivo de código fuente está marcado con un indicador de inicio y fin, junto con el nombre y la ruta relativa del archivo:\n\n"""
+FOOTER = """\n\n\n\nIMPORTANTE:
+
+* Siempre proporciona respuestas completas y detalladas.
+* Planifica tus pasos de manera estructurada antes de comenzar cualquier tarea.
+* Asegúrate de que tus respuestas sean técnicamente precisas y de alta calidad.
+
+A continuación, las tareas a completar:: \n\n"""
 
 def is_allowed_file(filename):
     """Verifica si el archivo tiene una extensión permitida."""
